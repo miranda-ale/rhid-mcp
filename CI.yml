@@ -1,0 +1,56 @@
+# ============================================================
+# CI — Lint, type-check e build do RHID MCP Server
+# ============================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          pip install ruff pyright
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Format check (ruff)
+        run: ruff format --check .
+
+      - name: Type check (pyright)
+        run: pyright
+        continue-on-error: true  # warning-only até estabilizar
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t rhid-mcp:${{ github.sha }} .
+
+      - name: Verificar imagem
+        run: |
+          docker run --rm rhid-mcp:${{ github.sha }} python -c "
+          from server import mcp, __version__
+          print(f'RHID MCP Server v{__version__}')
+          tools = list(mcp._tool_manager._tools.keys())
+          print(f'{len(tools)} tools registradas')
+          assert len(tools) >= 29, f'Esperado >=29 tools, encontrado {len(tools)}'
+          print('Build OK')
+          "
