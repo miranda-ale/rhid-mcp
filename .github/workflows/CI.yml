@@ -49,6 +49,6 @@ jobs:
           print(f'RHID MCP Server v{__version__}')
           tools = list(mcp._tool_manager._tools.keys())
           print(f'{len(tools)} tools registradas')
-          assert len(tools) >= 29, f'Esperado >=29 tools, encontrado {len(tools)}'
+          assert len(tools) >= 32, f'Esperado >=32 tools, encontrado {len(tools)}'
           print('Build OK')
           "

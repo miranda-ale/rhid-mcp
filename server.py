@@ -14,6 +14,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
 from tools.colaboradores import register_person_tools
+from tools.escalas import register_escala_tools
 from tools.organizacao import register_org_tools
 from tools.ponto import register_ponto_tools
 from tools.relatorios import register_report_tools
@@ -60,6 +61,7 @@ register_ponto_tools(mcp)
 register_person_tools(mcp)
 register_org_tools(mcp)
 register_report_tools(mcp)
+register_escala_tools(mcp)
 
 # ── Resources (documentação inline para o agente) ─────────────────
 
