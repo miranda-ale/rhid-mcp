@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rhid_client import rhid
 
 def register_escala_tools(mcp):

@@ -1,5 +1,6 @@
 # test_client.py
 import asyncio
+
 from rhid_client import rhid
 
 async def main():
