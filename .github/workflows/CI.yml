@@ -1,14 +1,12 @@
 # ============================================================
 # CI — Lint, type-check e build do RHID MCP Server
+# Chamado pelo publish.yml via workflow_call
 # ============================================================
 
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_call:
 
 jobs:
   lint-and-typecheck:
