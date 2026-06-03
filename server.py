@@ -20,14 +20,11 @@ __version__ = "1.0.0"
 
 # ── Logging ──────────────────────────────────────────────────────
 # stdio → log para stderr (stdout reservado para o protocolo MCP)
-# streamable-http → log para stdout normalmente
-_transport = os.getenv("MCP_TRANSPORT", "streamable-http")
-_log_stream = sys.stderr if _transport == "stdio" else sys.stdout
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    stream=_log_stream,
+    stream=sys.stderr,
 )
 logger = logging.getLogger("rhid-mcp")
 
@@ -80,12 +77,5 @@ async def rhid_health_check() -> dict:
 # ── Entry point ──────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    host = os.getenv("MCP_HOST", "0.0.0.0")
-    port = int(os.getenv("MCP_PORT", "8765"))
-
-    logger.info("RHID MCP Server v%s iniciando (transport=%s)", __version__, _transport)
-
-    if _transport == "stdio":
-        mcp.run(transport="stdio")
-    else:
-        mcp.run(transport="streamable-http", host=host, port=port)
+    logger.info("RHID MCP Server v%s iniciando", __version__)
+    mcp.run(transport="stdio")

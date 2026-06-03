@@ -39,13 +39,6 @@ ENV PYTHONUNBUFFERED=1
 # Não gerar .pyc (desnecessário em container)
 ENV PYTHONDONTWRITEBYTECODE=1
 
-EXPOSE 8765
-
-# Health check nativo do Docker
-# Verifica se o servidor HTTP está respondendo a cada 30s
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD python -c "import httpx; r = httpx.get('http://localhost:8765/mcp', timeout=5); assert r.status_code < 500" || exit 1
-
 USER mcp
 
 ENTRYPOINT ["python", "server.py"]
