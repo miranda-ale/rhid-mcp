@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
 from rhid_client import rhid
-
-
-def _to_iso(date_str: str) -> str:
-    """Converte DD/MM/YYYY → YYYY-MM-DD exigido pela API RHID."""
-    return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
+from tools._utils import to_iso
 
 
 def register_ponto_tools(mcp: FastMCP) -> None:
@@ -46,7 +41,7 @@ def register_ponto_tools(mcp: FastMCP) -> None:
             "/apuracao_ponto",
             params={
                 "idPerson": id_person,
-                "dataIni": _to_iso(data_ini),
-                "dataFinal": _to_iso(data_final),
+                "dataIni": to_iso(data_ini),
+                "dataFinal": to_iso(data_final),
             },
         )

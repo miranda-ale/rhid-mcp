@@ -8,6 +8,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
 from rhid_client import rhid
+from tools._utils import to_iso_optional
 
 _AFD = "/report/afd"
 _AFD_COLETOR = "/report/afd_coletor_marcacao"
@@ -24,9 +25,9 @@ def _build_afd_params(
     """Monta os query params comuns a todos os relatórios AFD."""
     params: dict[str, Any] = {"idEquipamento": id_equipamento}
     if data_ini:
-        params["dataIni"] = data_ini
+        params["dataIni"] = to_iso_optional(data_ini)
     if data_final:
-        params["dataFinal"] = data_final
+        params["dataFinal"] = to_iso_optional(data_final)
     if nsr_inicial is not None:
         params["nsrInicial"] = nsr_inicial
     if limit is not None:
