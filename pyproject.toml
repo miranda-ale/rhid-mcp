@@ -20,6 +20,10 @@ ignore = ["E501"]
 [tool.ruff.lint.isort]
 known-first-party = ["rhid_client", "tools"]
 
+[tool.ruff.lint.per-file-ignores]
+"test_client.py" = ["I001"]
+"tools/escalas.py" = ["I001"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
