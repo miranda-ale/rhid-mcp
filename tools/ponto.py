@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
 from rhid_client import rhid
+
+
+def _to_iso(date_str: str) -> str:
+    """Converte DD/MM/YYYY → YYYY-MM-DD exigido pela API RHID."""
+    return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
 
 
 def register_ponto_tools(mcp: FastMCP) -> None:
@@ -30,13 +36,17 @@ def register_ponto_tools(mcp: FastMCP) -> None:
             data_final: Data de fim no formato DD/MM/YYYY.
 
         Returns:
-            Registros de ponto com horários, horas trabalhadas e ocorrências.
+            Lista de registros diários com marcações, horas trabalhadas, faltas e
+            justificativas. Cada item tem: date, diasTrabalhados, faltaDiaInteiro,
+            listAfdtManutencao (marcações E/S), isHoliday, totalHorasTrabalhadas.
+            Registros com _typeEntradaSaida="D" e _typeClassification="J" são
+            faltas justificadas; abreviationJustification indica o motivo.
         """
         return await rhid.get(
             "/apuracao_ponto",
             params={
                 "idPerson": id_person,
-                "dataIni": data_ini,
-                "dataFinal": data_final,
+                "dataIni": _to_iso(data_ini),
+                "dataFinal": _to_iso(data_final),
             },
         )

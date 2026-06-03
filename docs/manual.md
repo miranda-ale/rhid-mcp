@@ -49,12 +49,46 @@ A API não tem busca por nome — é necessário paginar `rhid_listar_colaborado
 rhid_apuracao_ponto(id_person=<int>, data_ini="DD/MM/YYYY", data_final="DD/MM/YYYY")
 ```
 
+O tool converte automaticamente DD/MM/YYYY → YYYY-MM-DD antes de enviar à API.
+
 **Retorna `[]` (lista vazia) quando:**
-- Colaborador não está vinculado a nenhum dispositivo biométrico
+- Colaborador não está vinculado a nenhum dispositivo biométrico (`linkedDeviceIds: []`)
 - A empresa não usa controle de ponto eletrônico
 - Não há marcações no período informado
 
 Isso **não é erro** — é a resposta legítima da API para esse cenário.
+
+**Estrutura de cada registro diário:**
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `date` | str | Data do dia (`2026-05-18T00:00:00`) |
+| `diasTrabalhados` | int | `1` se trabalhou, `0` se não |
+| `diasUteis` | int | `1` se era dia útil no horário |
+| `faltaDiaInteiro` | bool | `true` se faltou o dia todo |
+| `totalHorasTrabalhadas` | int | Minutos efetivamente trabalhados |
+| `isHoliday` | int | `1` se feriado |
+| `atrasoEntrada` | int | Minutos de atraso na entrada |
+| `horasAusentes` | int | Minutos ausentes no período |
+| `saldoBancoFinalDia` | float | Saldo banco de horas ao fim do dia |
+| `listAfdtManutencao` | list | Marcações do dia (ver abaixo) |
+
+**Marcações (`listAfdtManutencao`):**
+
+| Campo | Valores | Descrição |
+|---|---|---|
+| `_typeEntradaSaida` | `E` / `S` / `D` | Entrada / Saída / Desconto (falta) |
+| `_typeClassification` | `J` | Falta justificada |
+| `abreviationJustification` | str | Motivo: `Atestado`, `Home Office`, `Declaração de Horas`, etc. |
+| `_typeRegister` | `O` / `I` | Original (biométrica) / Inserção manual |
+| `diferencaReal` | int | Minutos de diferença em relação ao horário previsto |
+
+**Como identificar faltas:**
+```
+Falta justificada: _typeEntradaSaida == "D" AND _typeClassification == "J"
+Falta sem justificativa: diasUteis == 1 AND diasTrabalhados == 0 AND isHoliday == 0
+Atraso: atrasoEntrada > 0
+```
 
 ---
 
