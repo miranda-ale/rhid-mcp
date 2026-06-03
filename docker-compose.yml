@@ -6,11 +6,16 @@ services:
   rhid-mcp:
     image: ghcr.io/miranda-ale/rhdi-mcp:latest
 
+    ports:
+      - "${MCP_PORT:-8765}:8765"
+
     environment:
       - RHID_LOGIN=${RHID_LOGIN}
       - RHID_PASSWORD=${RHID_PASSWORD}
       - RHID_DOMAIN=${RHID_DOMAIN:-}
       - RHID_BASE_URL=${RHID_BASE_URL:-https://www.rhid.com.br/v2/api.svc}
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8765
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
 
     deploy:

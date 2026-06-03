@@ -39,6 +39,12 @@ ENV PYTHONUNBUFFERED=1
 # Não gerar .pyc (desnecessário em container)
 ENV PYTHONDONTWRITEBYTECODE=1
 
+EXPOSE 8765
+
+# Health check: verifica /health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD python -c "import httpx; r = httpx.get('http://localhost:8765/health', timeout=5); assert r.status_code == 200" || exit 1
+
 USER mcp
 
-ENTRYPOINT ["python", "server.py"]
+ENTRYPOINT ["python", "http_server.py"]
