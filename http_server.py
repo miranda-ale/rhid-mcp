@@ -147,10 +147,10 @@ async def mcp_request(request: Request) -> StreamingResponse:
             yield f"data: {json.dumps(response_data)}\n\n"
 
         except TimeoutError:
-            yield f'data: {json.dumps({"error": "MCP response timeout"})}\n\n'
+            yield f"data: {json.dumps({'error': 'MCP response timeout'})}\n\n"
         except Exception as e:
             logger.exception("Erro em mcp_request")
-            yield f'data: {json.dumps({"error": str(e)})}\n\n'
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
