@@ -10,9 +10,12 @@ import os
 import sys
 from collections.abc import AsyncGenerator
 
+import secrets
+
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
 # Logging
@@ -22,7 +25,32 @@ logging.basicConfig(
 )
 logger = logging.getLogger("rhid-mcp-http")
 
+_API_KEY = os.getenv("MCP_API_KEY", "")
+
+PUBLIC_PATHS = {"/health"}
+
+
+class ApiKeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in PUBLIC_PATHS:
+            return await call_next(request)
+
+        if not _API_KEY:
+            logger.warning("MCP_API_KEY não configurada — acesso bloqueado")
+            return JSONResponse({"error": "server misconfigured"}, status_code=503)
+
+        auth = request.headers.get("Authorization", "")
+        token = auth.removeprefix("Bearer ").strip()
+
+        if not secrets.compare_digest(token, _API_KEY):
+            logger.warning("Tentativa de acesso não autorizado de %s", request.client)
+            return JSONResponse({"error": "unauthorized"}, status_code=401)
+
+        return await call_next(request)
+
+
 app = FastAPI(title="RHID MCP Server", version="1.0.0")
+app.add_middleware(ApiKeyMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
