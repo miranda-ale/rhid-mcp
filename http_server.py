@@ -61,27 +61,31 @@ class _ApiKeyMiddleware:
     @staticmethod
     async def _health(send) -> None:
         payload = b'{"status":"healthy"}'
-        await send({
-            "type": "http.response.start",
-            "status": 200,
-            "headers": [
-                [b"content-type", b"application/json"],
-                [b"content-length", str(len(payload)).encode()],
-            ],
-        })
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [
+                    [b"content-type", b"application/json"],
+                    [b"content-length", str(len(payload)).encode()],
+                ],
+            }
+        )
         await send({"type": "http.response.body", "body": payload})
 
     @staticmethod
     async def _json(send, status: int, body: dict) -> None:
         payload = json.dumps(body).encode()
-        await send({
-            "type": "http.response.start",
-            "status": status,
-            "headers": [
-                [b"content-type", b"application/json"],
-                [b"content-length", str(len(payload)).encode()],
-            ],
-        })
+        await send(
+            {
+                "type": "http.response.start",
+                "status": status,
+                "headers": [
+                    [b"content-type", b"application/json"],
+                    [b"content-length", str(len(payload)).encode()],
+                ],
+            }
+        )
         await send({"type": "http.response.body", "body": payload})
 
 
