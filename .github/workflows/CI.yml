@@ -44,7 +44,7 @@ jobs:
 
       - name: Verificar imagem
         run: |
-          docker run --rm rhid-mcp:${{ github.sha }} python -c "
+          docker run --rm --entrypoint python rhid-mcp:${{ github.sha }} -c "
           from server import mcp, __version__
           print(f'RHID MCP Server v{__version__}')
           tools = list(mcp._tool_manager._tools.keys())
