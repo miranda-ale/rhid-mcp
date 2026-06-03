@@ -8,12 +8,12 @@ import json
 import logging
 import os
 import sys
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
-import uvicorn
 
 # Logging
 logging.basicConfig(
@@ -112,7 +112,7 @@ async def shutdown() -> None:
         mcp_process.terminate()
         try:
             await asyncio.wait_for(mcp_process.wait(), timeout=5)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             mcp_process.kill()
             await mcp_process.wait()
         logger.info("MCP Server encerrado")
@@ -146,7 +146,7 @@ async def mcp_request(request: Request) -> StreamingResponse:
             # Retorna como SSE
             yield f"data: {json.dumps(response_data)}\n\n"
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             yield f'data: {json.dumps({"error": "MCP response timeout"})}\n\n'
         except Exception as e:
             logger.exception("Erro em mcp_request")
