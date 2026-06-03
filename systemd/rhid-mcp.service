@@ -1,0 +1,16 @@
+[Unit]
+Description=RHID MCP Server — BHCL/Biowise
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/rhid-mcp
+ExecStart=/opt/rhid-mcp/venv/bin/python server.py
+Restart=always
+RestartSec=5
+EnvironmentFile=/opt/rhid-mcp/.env
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,111 @@
+"""
+Cliente HTTP para a API do RHID (ControlID).
+Gerencia autenticação JWT com renovação automática a cada 4h.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import os
+import time
+from typing import Any
+
+import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BASE_URL = os.getenv("RHID_BASE_URL", "https://www.rhid.com.br/v2/api.svc")
+
+
+class RHIDClient:
+    def __init__(self) -> None:
+        self._token: str | None = None
+        self._token_expires_at: float = 0
+        self._lock = asyncio.Lock()
+
+    async def _ensure_token(self) -> None:
+        async with self._lock:
+            if time.time() >= self._token_expires_at - 300:
+                await self._login()
+
+    async def _login(self) -> None:
+        payload: dict[str, str] = {
+            "email": os.getenv("RHID_LOGIN", ""),
+            "password": os.getenv("RHID_PASSWORD", ""),
+        }
+        domain = os.getenv("RHID_DOMAIN", "")
+        if domain:
+            payload["domain"] = domain
+
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.post(f"{BASE_URL}/login", json=payload)
+            r.raise_for_status()
+            data: dict[str, Any] = r.json()
+
+            if data.get("error"):
+                msg = f"Falha no login RHID: {data['error']}"
+                raise ValueError(msg)
+
+            self._token = data["accessToken"]
+            self._token_expires_at = time.time() + (4 * 3600)
+
+    def _headers(self) -> dict[str, str]:
+        return {"Authorization": f"Bearer {self._token}" if self._token else ""}
+
+    async def get(self, path: str, params: dict[str, Any] | None = None) -> Any:
+        await self._ensure_token()
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.get(
+                f"{BASE_URL}{path}",
+                headers=self._headers(),
+                params=params or {},
+            )
+            r.raise_for_status()
+            return r.json()
+
+    async def post(self, path: str, body: Any) -> Any:
+        await self._ensure_token()
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.post(
+                f"{BASE_URL}{path}",
+                headers=self._headers(),
+                json=body,
+            )
+            r.raise_for_status()
+            return r.json()
+
+    async def put(self, path: str, body: Any) -> Any:
+        await self._ensure_token()
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.put(
+                f"{BASE_URL}{path}",
+                headers=self._headers(),
+                json=body,
+            )
+            r.raise_for_status()
+            return r.json()
+
+    async def patch(self, path: str, body: Any) -> Any:
+        await self._ensure_token()
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.patch(
+                f"{BASE_URL}{path}",
+                headers=self._headers(),
+                json=body,
+            )
+            r.raise_for_status()
+            return r.json()
+
+    async def delete(self, path: str) -> Any:
+        await self._ensure_token()
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.delete(
+                f"{BASE_URL}{path}",
+                headers=self._headers(),
+            )
+            r.raise_for_status()
+            return r.json()
+
+
+rhid = RHIDClient()

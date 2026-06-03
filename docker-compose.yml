@@ -1,0 +1,15 @@
+services:
+  rhid-mcp:
+    build: .
+    container_name: rhid-mcp
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    environment:
+      - RHID_LOGIN=${RHID_LOGIN}
+      - RHID_PASSWORD=${RHID_PASSWORD}
+      - RHID_DOMAIN=${RHID_DOMAIN:-}
+      - RHID_BASE_URL=${RHID_BASE_URL:-https://www.rhid.com.br/v2/api.svc}
+      - MCP_TRANSPORT=streamable-http
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8765
