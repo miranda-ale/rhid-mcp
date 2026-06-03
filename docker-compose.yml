@@ -1,14 +1,10 @@
 # ============================================================
-# RHID MCP Server — docker-compose de produção
+# RHID MCP Server — docker-compose de produção (Swarm/Dokploy)
 # ============================================================
 
 services:
   rhid-mcp:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: rhid-mcp
-    restart: unless-stopped
+    image: ghcr.io/miranda-ale/rhdi-mcp:latest
 
     ports:
       - "${MCP_PORT:-8765}:8765"
@@ -23,7 +19,6 @@ services:
       - MCP_PORT=8765
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
 
-    # Limites de recursos (VPS Hostinger KVM 4)
     deploy:
       resources:
         limits:
@@ -33,7 +28,6 @@ services:
           cpus: "0.25"
           memory: 128M
 
-    # Logging estruturado com rotação
     logging:
       driver: json-file
       options:
@@ -41,18 +35,9 @@ services:
         max-file: "3"
         tag: "rhid-mcp"
 
-    # Health check (redundante com o do Dockerfile, mas
-    # garante visibilidade no docker compose ps)
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; r = httpx.get('http://localhost:8765/mcp', timeout=5); assert r.status_code < 500"]
       interval: 30s
       timeout: 10s
       start_period: 15s
       retries: 3
-
-    # Segurança adicional
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
