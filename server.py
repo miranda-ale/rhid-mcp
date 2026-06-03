@@ -10,6 +10,7 @@ import os
 import sys
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from tools.colaboradores import register_person_tools
 from tools.organizacao import register_org_tools
@@ -32,6 +33,9 @@ logger = logging.getLogger("rhid-mcp")
 
 mcp = FastMCP(
     name="rhid-bhcl",
+    # DNS rebinding protection disabled: service runs behind a reverse proxy
+    # with API key authentication handled by _ApiKeyMiddleware in http_server.py
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
     instructions=(
         "Servidor de integração com o sistema RHID (ControlID) da BHCL/Biowise. "
         "Fornece acesso a apuração de ponto, colaboradores, estrutura organizacional "
