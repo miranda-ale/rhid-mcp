@@ -3,6 +3,7 @@ import asyncio
 
 from rhid_client import rhid
 
+
 async def main():
     # Testa login + listagem
     empresas = await rhid.get("/company", params={"start": 0, "length": 5})
@@ -13,5 +14,6 @@ async def main():
 
     dispositivos = await rhid.get("/device", params={"start": 0, "length": 5})
     print("Dispositivos:", dispositivos)
+
 
 asyncio.run(main())

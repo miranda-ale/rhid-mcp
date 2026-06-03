@@ -32,7 +32,8 @@ def register_org_tools(mcp: FastMCP) -> None:
             (id, name, idCompany, folha, companyName, idApprovalFlow).
         """
         return await rhid.get(
-            _DEPARTMENT, params={"start": start, "length": length},
+            _DEPARTMENT,
+            params={"start": start, "length": length},
         )
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
@@ -141,7 +142,8 @@ def register_org_tools(mcp: FastMCP) -> None:
             (id, cnpj, name, tradingName, city, state, etc.).
         """
         return await rhid.get(
-            _COMPANY, params={"start": start, "length": length},
+            _COMPANY,
+            params={"start": start, "length": length},
         )
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))

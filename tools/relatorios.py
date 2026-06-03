@@ -57,7 +57,11 @@ def register_report_tools(mcp: FastMCP) -> None:
             limit:       Limite de registros. Opcional.
         """
         params = _build_afd_params(
-            id_equipamento, data_ini, data_final, nsr_inicial, limit,
+            id_equipamento,
+            data_ini,
+            data_final,
+            nsr_inicial,
+            limit,
         )
         return await rhid.get(f"{_AFD}/download", params=params)
 
@@ -74,7 +78,11 @@ def register_report_tools(mcp: FastMCP) -> None:
         Parâmetros idênticos ao rhid_relatorio_afd_1510.
         """
         params = _build_afd_params(
-            id_equipamento, data_ini, data_final, nsr_inicial, limit,
+            id_equipamento,
+            data_ini,
+            data_final,
+            nsr_inicial,
+            limit,
         )
         return await rhid.get(f"{_AFD}/download671", params=params)
 
@@ -88,7 +96,11 @@ def register_report_tools(mcp: FastMCP) -> None:
     ) -> Any:
         """AFD Portaria 1510 para REP-P (coletores de marcação móvel)."""
         params = _build_afd_params(
-            id_equipamento, data_ini, data_final, nsr_inicial, limit,
+            id_equipamento,
+            data_ini,
+            data_final,
+            nsr_inicial,
+            limit,
         )
         return await rhid.get(f"{_AFD_COLETOR}/download", params=params)
 
@@ -102,7 +114,11 @@ def register_report_tools(mcp: FastMCP) -> None:
     ) -> Any:
         """AFD Portaria 671 para REP-P (coletores de marcação móvel)."""
         params = _build_afd_params(
-            id_equipamento, data_ini, data_final, nsr_inicial, limit,
+            id_equipamento,
+            data_ini,
+            data_final,
+            nsr_inicial,
+            limit,
         )
         return await rhid.get(f"{_AFD_COLETOR}/download671", params=params)
 
@@ -121,7 +137,8 @@ def register_report_tools(mcp: FastMCP) -> None:
             (id, name, serial, version, status, lastConnectionDate, etc.).
         """
         return await rhid.get(
-            _DEVICE, params={"start": start, "length": length},
+            _DEVICE,
+            params={"start": start, "length": length},
         )
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))

@@ -50,6 +50,7 @@ register_report_tools(mcp)
 
 # ── Health check (disponível como tool para verificação interna) ─
 
+
 @mcp.tool()
 async def rhid_health_check() -> dict:
     """
