@@ -1,7 +1,7 @@
 [project]
 name = "rhid-mcp"
 version = "1.0.0"
-description = "MCP server para integração com a API RHiD (ControlID) — BHCL/Biowise"
+description = "MCP server para integração com a API RHID (ControlID) — BHCL/Biowise"
 requires-python = ">=3.12"
 dependencies = [
     "mcp>=1.0.0",

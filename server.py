@@ -1,6 +1,6 @@
 """
 RHID MCP Server — BHCL / Biowise
-Integração com a API RHiD (ControlID).
+Integração com a API RHID (ControlID).
 """
 
 from __future__ import annotations

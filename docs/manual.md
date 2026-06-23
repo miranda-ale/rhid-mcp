@@ -1,7 +1,11 @@
 # Manual do RHID MCP Server — BHCL/Biowise
 
+> **Nota sobre o nome**: O sistema é **RHID** (ControlID), e não RHDI.
+> Todas as ferramentas usam o prefixo `rhid_*`.
+
 Servidor de integração com o **ControlID RHID** (`https://www.rhid.com.br/v2/api.svc`).
-Gerencia colaboradores, ponto eletrônico, estrutura organizacional e relatórios AFD.
+Gerencia colaboradores, ponto eletrônico, estrutura organizacional, dispositivos,
+escalas e relatórios AFD.
 
 ---
 
@@ -185,5 +189,39 @@ AFD = Arquivo de Fonte de Dados para fiscalização do MTE.
 
 | Tool | Operação |
 |---|---|
-| `listar_escalas` | Lista todas as escalas cadastradas |
-| `buscar_escala` | Busca por código (ex: `"TT-001"`) |
+| `listar_escalas` | GET `/customerdb/shift.svc/a_escalas` — lista todas as escalas |
+| `buscar_escala` | GET `/customerdb/shift.svc/a_escalas` — filtra localmente por código |
+
+**Observação:** Estas ferramentas consultam endpoints descobertos via DevTools
+(rota `shift.svc`), não documentados no Swagger oficial da API.
+
+---
+
+## Health Check
+
+| Tool | Descrição |
+|---|---|
+| `rhid_health_check` | Verifica conectividade com a API RHID. Retorna status, versão e nº de empresas. |
+
+Útil para monitoramento pós-deploy e validação de credenciais.
+
+---
+
+## Gaps de cobertura
+
+O sistema RHID (ControlID v26.6.16.0) da BHCL possui funcionalidades **não expostas**
+como ferramentas MCP:
+
+### Cadastros (16 submenus — apenas 4 cobertos)
+O MCP cobre Colaboradores, Departamentos, Cargos e Centros de Custo. Faltam:
+Faces, Motivos de Demissão, Feriados, Layouts TXT, Tipos de Inconsistência,
+Tipos de Justificativa, Atribuições em Massa, Locais de Trabalho,
+Fluxos de Aprovação, Motivos de Inclusão e Notificações.
+
+### Relatórios (25 tipos — apenas AFD coberto)
+O MCP cobre apenas os 4 relatórios AFD (fiscal). Faltam 21 tipos: Espelho de Ponto,
+Cartão de Ponto, Extrato por Período, Ponto Diário, Inconsistências, Absenteísmo,
+Histórico de Relatórios, Relatórios Cadastrais (15 sub-relatórios), e outros
+relatórios gerenciais.
+
+> Consulte o `README.MD` para a lista completa de gaps.

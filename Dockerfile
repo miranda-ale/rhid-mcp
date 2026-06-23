@@ -16,7 +16,7 @@ FROM python:3.13-slim
 
 # Metadata OCI (padrão de mercado para labels)
 LABEL org.opencontainers.image.title="RHID MCP Server"
-LABEL org.opencontainers.image.description="MCP server para integração com a API RHiD (ControlID) — BHCL/Biowise"
+LABEL org.opencontainers.image.description="MCP server para integração com a API RHID (ControlID) — BHCL/Biowise"
 LABEL org.opencontainers.image.vendor="BHCL"
 LABEL org.opencontainers.image.source="https://github.com/miranda-ale/rhdi-mcp"
 LABEL org.opencontainers.image.version="1.0.0"

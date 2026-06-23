@@ -1,6 +1,9 @@
+> **Nota sobre o nome**: O sistema integrado é o **RHID** (ControlID), não RHDI.
+> Toda a documentação utiliza `RHID` e `rhid_*` como prefixo.
+
 # RHID MCP Server — Guia de Deploy
 
-> Versão: 1.0.0 | Última atualização: Junho 2026
+> Versão: 1.1.0 | Última atualização: Junho 2026
 
 ---
 
@@ -320,7 +323,7 @@ O pipeline em `.github/workflows/ci.yml` executa automaticamente em cada push/PR
 
 1. **Lint** — `ruff check` e `ruff format --check`
 2. **Type check** — `pyright` (modo warning)
-3. **Build** — constrói a imagem Docker e valida que as 29+ tools estão registradas
+3. **Build** — constrói a imagem Docker e valida que as 32+ ferramentas estão registradas
 
 Para deploy automático via Dokploy, ative o **Auto Deploy** na configuração da aplicação — o Dokploy faz pull e rebuild automaticamente quando detecta push na branch `main`.
 
