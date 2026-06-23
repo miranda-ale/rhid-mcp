@@ -36,10 +36,13 @@ def register_layouttxt_tools(mcp: FastMCP) -> None:
             - idCompany (int): ID da empresa vinculada
             - layout (str): Definição do layout
         """
-        return await rhid.get(f"{_PATH}/a", params={
-            "start": start,
-            "length": length,
-        })
+        return await rhid.get(
+            f"{_PATH}/a",
+            params={
+                "start": start,
+                "length": length,
+            },
+        )
 
     # ── Create ────────────────────────────────────────────────────────
 

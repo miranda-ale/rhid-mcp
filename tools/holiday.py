@@ -38,10 +38,13 @@ def register_holiday_tools(mcp: FastMCP) -> None:
             - type (int): Tipo (0=fixo, 1=móvel, etc.)
             - abrangence (int): Abrangência (1=nacional, 2=estadual, 3=municipal)
         """
-        return await rhid.get(f"{_PATH}/a", params={
-            "start": start,
-            "length": length,
-        })
+        return await rhid.get(
+            f"{_PATH}/a",
+            params={
+                "start": start,
+                "length": length,
+            },
+        )
 
     # ── Create ────────────────────────────────────────────────────────
 

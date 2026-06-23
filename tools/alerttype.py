@@ -35,10 +35,13 @@ def register_alerttype_tools(mcp: FastMCP) -> None:
             - description (str): Nome/descrição
             - idCompany (int): ID da empresa vinculada
         """
-        return await rhid.get(f"{_PATH}/a", params={
-            "start": start,
-            "length": length,
-        })
+        return await rhid.get(
+            f"{_PATH}/a",
+            params={
+                "start": start,
+                "length": length,
+            },
+        )
 
     # ── Create ────────────────────────────────────────────────────────
 

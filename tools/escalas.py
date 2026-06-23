@@ -33,10 +33,13 @@ def register_escala_tools(mcp: FastMCP) -> None:
             Resultado paginado com totalRecords e lista de escalas
             (id, codigo, description, idCompany, companyName, etc.).
         """
-        return await rhid.get(f"{_PATH}/a_escalas", params={
-            "start": start,
-            "length": length,
-        })
+        return await rhid.get(
+            f"{_PATH}/a_escalas",
+            params={
+                "start": start,
+                "length": length,
+            },
+        )
 
     # ── Buscar por código ─────────────────────────────────────────────
 

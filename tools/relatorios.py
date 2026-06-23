@@ -240,9 +240,7 @@ def register_report_tools(mcp: FastMCP) -> None:
         """
         if tipo not in _TIPOS_RELATORIO:
             tipos_validos = ", ".join(_TIPOS_RELATORIO)
-            raise ValueError(
-                f"Tipo inválido '{tipo}'. Valores válidos: {tipos_validos}"
-            )
+            raise ValueError(f"Tipo inválido '{tipo}'. Valores válidos: {tipos_validos}")
 
         payload = _build_ponto_payload(tipo, empresa_id, data_inicio, data_fim, formato, destino)
         return await rhid.post(_REPORT_PONTO, body=payload)

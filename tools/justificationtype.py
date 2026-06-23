@@ -36,10 +36,13 @@ def register_justificationtype_tools(mcp: FastMCP) -> None:
             - idCompany (int): ID da empresa vinculada
             - abbreviation (str): Abreviação
         """
-        return await rhid.get(f"{_PATH}/a", params={
-            "start": start,
-            "length": length,
-        })
+        return await rhid.get(
+            f"{_PATH}/a",
+            params={
+                "start": start,
+                "length": length,
+            },
+        )
 
     # ── Create ────────────────────────────────────────────────────────
 
