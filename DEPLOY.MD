@@ -3,7 +3,8 @@
 
 # RHID MCP Server — Guia de Deploy
 
-> Versão: 1.1.0 | Última atualização: Junho 2026
+> Versão: 1.2.0 | Última atualização: Junho 2026
+> Cobertura atual: **32 ferramentas** | Meta pós-expansão: **~100+ ferramentas**
 
 ---
 
@@ -21,6 +22,7 @@
 10. [Troubleshooting](#10-troubleshooting)
 11. [Segurança](#11-segurança)
 12. [Adicionando novos endpoints](#12-adicionando-novos-endpoints)
+13. [Plano de Expansão](#13-plano-de-expansão)
 
 ---
 
@@ -61,6 +63,10 @@ rhid-mcp/
     └── workflows/
         └── ci.yml           # Pipeline de CI
 ```
+
+> 💡 À medida que novas ferramentas forem adicionadas (expansão para ~100+ tools),
+> novos arquivos serão criados em `tools/` seguindo o padrão estabelecido.
+> Veja a seção [12. Adicionando novos endpoints](#12-adicionando-novos-endpoints).
 
 ---
 
@@ -327,13 +333,16 @@ O pipeline em `.github/workflows/ci.yml` executa automaticamente em cada push/PR
 
 Para deploy automático via Dokploy, ative o **Auto Deploy** na configuração da aplicação — o Dokploy faz pull e rebuild automaticamente quando detecta push na branch `main`.
 
+> 💡 Conforme novas ferramentas forem adicionadas durante a expansão, o pipeline deve
+> validar a contagem crescente de tools (52, 68, 80... até ~100).
+
 ---
 
 ## 10. Troubleshooting
 
 ### Erro 400 Bad Request nas chamadas
 
-A API RHID exige o header `Authorization: Bearer <token>`. Verifique se o `rhid_client.py` está enviando o prefixo `Bearer`.
+A API RHID exige o header `Authorization: Bearer *** Verifique se o `rhid_client.py` está enviando o prefixo `Bearer`.
 
 ### Container "unhealthy"
 
@@ -400,9 +409,7 @@ dt = datetime.datetime.fromtimestamp(ms / 1000)
 
 ## 12. Adicionando novos endpoints
 
-Para integrar endpoints descobertos via DevTools (não documentados no Swagger):
-
-### 12.1. Criar o arquivo de tools
+### 12.1. Endpoints REST (Swagger — padrão tradicional)
 
 ```python
 # tools/escalas.py
@@ -422,17 +429,119 @@ def register_escala_tools(mcp: FastMCP) -> None:
         return await rhid.get(_PATH)
 ```
 
-### 12.2. Registrar no server.py
+### 12.2. Endpoints .svc (descobertos via DevTools)
+
+Para endpoints SPA descobertos através da análise de tráfego de rede do navegador:
+
+```python
+# tools/feriados.py
+from __future__ import annotations
+from typing import Any
+from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
+from rhid_client import rhid
+
+_PATH = "/customerdb/holiday.svc"
+
+def register_feriado_tools(mcp: FastMCP) -> None:
+
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
+    async def rhid_listar_feriados() -> Any:
+        """Lista todos os feriados cadastrados.
+        
+        Endpoint descoberto via DevTools (SPA) — não documentado no Swagger oficial.
+        Rota: GET /customerdb/holiday.svc/a
+        """
+        return await rhid.get(f"{_PATH}/a")
+
+    @mcp.tool()
+    async def rhid_criar_feriado(data: dict) -> Any:
+        """Cria um novo feriado.
+        
+        Endpoint descoberto via DevTools (SPA).
+        Rota: POST /customerdb/holiday.svc/c
+        """
+        return await rhid.post(f"{_PATH}/c", data)
+
+    @mcp.tool()
+    async def rhid_atualizar_feriado(data: dict) -> Any:
+        """Atualiza um feriado existente."""
+        return await rhid.put(f"{_PATH}/u", data)
+
+    @mcp.tool()
+    async def rhid_remover_feriado(id: int) -> Any:
+        """Remove um feriado pelo ID."""
+        return await rhid.delete(f"{_PATH}/d", params={"id": id})
+```
+
+### 12.3. Registrar no server.py
 
 ```python
 from tools.escalas import register_escala_tools
+from tools.feriados import register_feriado_tools
+
 register_escala_tools(mcp)
+register_feriado_tools(mcp)
 ```
 
-### 12.3. Testar e fazer deploy
+### 12.4. Fluxo de descoberta via DevTools
+
+1. Acesse o RHID no navegador, abra DevTools (F12)
+2. Navegue até o módulo desejado (ex: Cadastros → Feriados)
+3. No Console, execute para capturar os endpoints `.svc` chamados:
+   ```javascript
+   performance.getEntriesByType('resource')
+     .filter(e => e.name.includes('.svc'))
+     .map(e => e.name.split('/v2/api.svc')[1] || e.name)
+   ```
+4. Confirme o método HTTP e payload na aba **Network**
+5. Crie o arquivo de tools seguindo o padrão acima
+6. Teste com `make inspect` e faça deploy
+
+### 12.5. Testar e fazer deploy
 
 ```bash
 make inspect   # testar no MCP Inspector
-git add . && git commit -m "feat: tools de escalas"
+git add . && git commit -m "feat: tools de feriados (+4)"
 git push       # Dokploy faz auto-deploy
 ```
+
+---
+
+## 13. Plano de Expansão
+
+O projeto RHID MCP Server segue um plano estruturado de **5 fases** para expandir
+das atuais **32 ferramentas** para **~100+**, cobrindo todos os módulos do sistema
+ControlID v26.6.16.0 (cliente BHCL).
+
+### Resumo das Fases
+
+| Fase | Descrição | Prazo | Tools (acumulado) |
+|:----:|-----------|:-----:|:------------------:|
+| **1** | CRUDs Imediatos (endpoints confirmados via DevTools) | 1-2 dias | 52 |
+| **2** | CRUDs Estimados (requer confirmação DevTools) | 3-5 dias | 68 |
+| **3** | Relatórios (requer exploração DevTools adicional) | 1-2 semanas | ~80 |
+| **4** | Módulos Novos (Config. Horário, Apuração, Equipamentos) | 2-4 semanas | ~100 |
+| **5** | Integração e Otimização (ERP, performance, cache) | Contínuo | 100+ |
+
+### Endpoints já mapeados
+
+Abaixo os endpoints `.svc` descobertos via DevTools que podem ser implementados:
+
+**Fase 1 (prontos para implementar):**
+- `holiday.svc/{a,c,u,d}` → Feriados
+- `reasondismissal.svc/{a,c,u,d}` → Motivos Demissão
+- `justificationtype.svc/{a,c,u,d}` → Tipos Justificativa
+- `alerttype.svc/{a,c,u,d}` → Tipos Inconsistência
+- `layouttxt.svc/{a,c,u,d}` → Layouts TXT
+
+**Fase 2 (estimar — confirmar antes):**
+- `workplace.svc/{a,c,u,d}` → Locais de Trabalho
+- `approvalflow.svc/{a,c,u,d}` → Fluxos de Aprovação
+- `inclusionreason.svc/{a,c,u,d}` → Motivos de Inclusão
+- `notification.svc/{a,c,u,d}` → Notificações
+
+### Documentação de referência
+
+Consulte o `README.MD` para a tabela completa de cobertura e o plano detalhado
+de expansão, incluindo métricas de sucesso, riscos e mitigações.

@@ -1,4 +1,4 @@
-"""Ferramentas MCP — Escalas de Horário (Shift)."""
+"""Ferramentas MCP — Layouts TXT (LayoutTXT)."""
 
 from __future__ import annotations
 
@@ -9,67 +9,52 @@ from mcp.types import ToolAnnotations
 
 from rhid_client import rhid
 
-_PATH = "/customerdb/shift.svc"
+_PATH = "/customerdb/layouttxt.svc"
 
 
-def register_escala_tools(mcp: FastMCP) -> None:
-    """Registra todas as tools de Escalas no servidor MCP."""
+def register_layouttxt_tools(mcp: FastMCP) -> None:
+    """Registra todas as tools de Layouts TXT no servidor MCP."""
 
     # ── List ──────────────────────────────────────────────────────────
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-    async def rhid_listar_escalas(
+    async def rhid_listar_layouts_txt(
         start: int = 0,
         length: int = 50,
     ) -> Any:
         """
-        Lista todas as escalas de horário cadastradas com paginação.
+        Lista todos os layouts de arquivo TXT cadastrados com paginação.
 
         Args:
             start:  Índice de início (offset). Padrão: 0.
             length: Quantidade de registros. Padrão: 50.
 
         Returns:
-            Resultado paginado com totalRecords e lista de escalas
-            (id, codigo, description, idCompany, companyName, etc.).
+            Objeto paginado com totalRecords e lista de LayoutTxtDTO:
+            - id (int): ID do layout
+            - description (str): Nome/descrição
+            - idCompany (int): ID da empresa vinculada
+            - layout (str): Definição do layout
         """
-        return await rhid.get(f"{_PATH}/a_escalas", params={
+        return await rhid.get(f"{_PATH}/a", params={
             "start": start,
             "length": length,
         })
 
-    # ── Buscar por código ─────────────────────────────────────────────
-
-    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-    async def rhid_buscar_escala(codigo: str) -> Any:
-        """
-        Busca uma escala específica pelo código.
-
-        Args:
-            codigo: Código da escala (ex: 'TT-001').
-
-        Returns:
-            A escala encontrada ou objeto com campo 'erro'.
-        """
-        escalas = await rhid.get(f"{_PATH}/a_escalas")
-        for e in escalas.get("data", escalas):
-            if e.get("codigo") == codigo or e.get("id") == codigo:
-                return e
-        return {"erro": f"Escala '{codigo}' não encontrada"}
-
     # ── Create ────────────────────────────────────────────────────────
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=False))
-    async def rhid_criar_escalas(
+    async def rhid_criar_layouts_txt(
         registros: list[dict[str, Any]],
     ) -> Any:
         """
-        Cria uma ou mais escalas de horário.
+        Cria um ou mais layouts de arquivo TXT.
 
         Args:
-            registros: Lista de dicionários com campos da escala.
-                Campos comuns: codigo (str), description (str),
-                idCompany (int), idDepartment (int, opcional).
+            registros: Lista de dicionários com campos:
+                - description (str): Nome/descrição (obrigatório)
+                - idCompany (int): ID da empresa (opcional)
+                - layout (str): Definição do layout (obrigatório)
         """
         return await rhid.post(f"{_PATH}/c", body=registros)
 
@@ -81,14 +66,14 @@ def register_escala_tools(mcp: FastMCP) -> None:
             idempotentHint=True,
         ),
     )
-    async def rhid_atualizar_escala(
+    async def rhid_atualizar_layout_txt(
         registro: dict[str, Any],
     ) -> Any:
         """
-        Atualiza uma escala de horário existente (PUT).
+        Atualiza um layout TXT existente (PUT).
 
         Args:
-            registro: Dicionário com campos da escala. Campo 'id' obrigatório.
+            registro: Dicionário com campos. Campo 'id' obrigatório.
         """
         return await rhid.put(f"{_PATH}/u", body=registro)
 
@@ -100,13 +85,13 @@ def register_escala_tools(mcp: FastMCP) -> None:
             destructiveHint=True,
         ),
     )
-    async def rhid_remover_escala(
-        escala_id: int,
+    async def rhid_remover_layout_txt(
+        layout_id: int,
     ) -> Any:
         """
-        Remove uma escala de horário. Operação destrutiva.
+        Remove um layout TXT. Operação destrutiva.
 
         Args:
-            escala_id: ID da escala a remover.
+            layout_id: ID do layout a remover.
         """
-        return await rhid.delete(f"{_PATH}/d?id={escala_id}")
+        return await rhid.delete(f"{_PATH}/d?id={layout_id}")

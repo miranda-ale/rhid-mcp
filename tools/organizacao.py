@@ -67,6 +67,27 @@ def register_org_tools(mcp: FastMCP) -> None:
     # ── Centros de Custo ─────────────────────────────────────────────
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
+    async def rhid_listar_centros_custo(
+        start: int = 0,
+        length: int = 50,
+    ) -> Any:
+        """
+        Lista todos os centros de custo cadastrados com paginação.
+
+        Args:
+            start:  Índice de início (offset). Padrão: 0.
+            length: Quantidade de registros. Padrão: 50.
+
+        Returns:
+            Resultado paginado com totalRecords e lista de CostCenterDTO
+            (id, companyName, idCompany, name).
+        """
+        return await rhid.get(
+            _COSTCENTERS,
+            params={"start": start, "length": length},
+        )
+
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
     async def rhid_buscar_centro_custo(cc_id: int) -> Any:
         """
         Busca um centro de custo pelo ID.
@@ -99,6 +120,27 @@ def register_org_tools(mcp: FastMCP) -> None:
         return await rhid.delete(f"{_COSTCENTERS}/{cc_id}")
 
     # ── Cargos (Person Roles) ────────────────────────────────────────
+
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
+    async def rhid_listar_cargos(
+        start: int = 0,
+        length: int = 50,
+    ) -> Any:
+        """
+        Lista todos os cargos cadastrados com paginação.
+
+        Args:
+            start:  Índice de início (offset). Padrão: 0.
+            length: Quantidade de registros. Padrão: 50.
+
+        Returns:
+            Resultado paginado com totalRecords e lista de PersonRoleDTO
+            (id, companyName, idCompany, name).
+        """
+        return await rhid.get(
+            _PERSONROLES,
+            params={"start": start, "length": length},
+        )
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
     async def rhid_buscar_cargo(role_id: int) -> Any:
@@ -150,3 +192,45 @@ def register_org_tools(mcp: FastMCP) -> None:
     async def rhid_buscar_empresa(company_id: int) -> Any:
         """Busca uma empresa pelo ID."""
         return await rhid.get(f"{_COMPANY}/{company_id}")
+
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=False))
+    async def rhid_criar_empresas(empresas: list[dict[str, Any]]) -> Any:
+        """
+        Cria uma ou mais empresas (unidades).
+
+        Args:
+            empresas: Lista de CompanyDTO.
+                Campos principais: cnpj (int), name (str),
+                tradingName (str, opcional), city (str), state (str).
+        """
+        return await rhid.post(_COMPANY, body=empresas)
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            readOnlyHint=False,
+            idempotentHint=True,
+        ),
+    )
+    async def rhid_atualizar_empresa(empresa: dict[str, Any]) -> Any:
+        """
+        Atualiza uma empresa/unidade existente.
+
+        Args:
+            empresa: CompanyDTO com campo 'id' obrigatório.
+        """
+        return await rhid.put(_COMPANY, body=empresa)
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            readOnlyHint=False,
+            destructiveHint=True,
+        ),
+    )
+    async def rhid_remover_empresa(company_id: int) -> Any:
+        """
+        Remove uma empresa/unidade. Operação destrutiva.
+
+        Args:
+            company_id: ID da empresa a remover.
+        """
+        return await rhid.delete(f"{_COMPANY}/{company_id}")

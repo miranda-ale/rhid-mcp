@@ -1,4 +1,4 @@
-"""Ferramentas MCP — Escalas de Horário (Shift)."""
+"""Ferramentas MCP — Motivos de Demissão (ReasonDismissal)."""
 
 from __future__ import annotations
 
@@ -9,67 +9,50 @@ from mcp.types import ToolAnnotations
 
 from rhid_client import rhid
 
-_PATH = "/customerdb/shift.svc"
+_PATH = "/customerdb/reasondismissal.svc"
 
 
-def register_escala_tools(mcp: FastMCP) -> None:
-    """Registra todas as tools de Escalas no servidor MCP."""
+def register_reasondismissal_tools(mcp: FastMCP) -> None:
+    """Registra todas as tools de Motivos de Demissão no servidor MCP."""
 
     # ── List ──────────────────────────────────────────────────────────
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-    async def rhid_listar_escalas(
+    async def rhid_listar_motivos_demissao(
         start: int = 0,
         length: int = 50,
     ) -> Any:
         """
-        Lista todas as escalas de horário cadastradas com paginação.
+        Lista todos os motivos de demissão cadastrados com paginação.
 
         Args:
             start:  Índice de início (offset). Padrão: 0.
             length: Quantidade de registros. Padrão: 50.
 
         Returns:
-            Resultado paginado com totalRecords e lista de escalas
-            (id, codigo, description, idCompany, companyName, etc.).
+            Objeto paginado com totalRecords e lista de ReasonDismissalDTO:
+            - id (int): ID do motivo
+            - description (str): Nome/descrição
+            - idCompany (int): ID da empresa vinculada
         """
-        return await rhid.get(f"{_PATH}/a_escalas", params={
+        return await rhid.get(f"{_PATH}/a", params={
             "start": start,
             "length": length,
         })
 
-    # ── Buscar por código ─────────────────────────────────────────────
-
-    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-    async def rhid_buscar_escala(codigo: str) -> Any:
-        """
-        Busca uma escala específica pelo código.
-
-        Args:
-            codigo: Código da escala (ex: 'TT-001').
-
-        Returns:
-            A escala encontrada ou objeto com campo 'erro'.
-        """
-        escalas = await rhid.get(f"{_PATH}/a_escalas")
-        for e in escalas.get("data", escalas):
-            if e.get("codigo") == codigo or e.get("id") == codigo:
-                return e
-        return {"erro": f"Escala '{codigo}' não encontrada"}
-
     # ── Create ────────────────────────────────────────────────────────
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=False))
-    async def rhid_criar_escalas(
+    async def rhid_criar_motivos_demissao(
         registros: list[dict[str, Any]],
     ) -> Any:
         """
-        Cria uma ou mais escalas de horário.
+        Cria um ou mais motivos de demissão.
 
         Args:
-            registros: Lista de dicionários com campos da escala.
-                Campos comuns: codigo (str), description (str),
-                idCompany (int), idDepartment (int, opcional).
+            registros: Lista de dicionários com campos:
+                - description (str): Nome/descrição (obrigatório)
+                - idCompany (int): ID da empresa (opcional)
         """
         return await rhid.post(f"{_PATH}/c", body=registros)
 
@@ -81,14 +64,14 @@ def register_escala_tools(mcp: FastMCP) -> None:
             idempotentHint=True,
         ),
     )
-    async def rhid_atualizar_escala(
+    async def rhid_atualizar_motivo_demissao(
         registro: dict[str, Any],
     ) -> Any:
         """
-        Atualiza uma escala de horário existente (PUT).
+        Atualiza um motivo de demissão existente (PUT).
 
         Args:
-            registro: Dicionário com campos da escala. Campo 'id' obrigatório.
+            registro: Dicionário com campos. Campo 'id' obrigatório.
         """
         return await rhid.put(f"{_PATH}/u", body=registro)
 
@@ -100,13 +83,13 @@ def register_escala_tools(mcp: FastMCP) -> None:
             destructiveHint=True,
         ),
     )
-    async def rhid_remover_escala(
-        escala_id: int,
+    async def rhid_remover_motivo_demissao(
+        reason_id: int,
     ) -> Any:
         """
-        Remove uma escala de horário. Operação destrutiva.
+        Remove um motivo de demissão. Operação destrutiva.
 
         Args:
-            escala_id: ID da escala a remover.
+            reason_id: ID do motivo de demissão a remover.
         """
-        return await rhid.delete(f"{_PATH}/d?id={escala_id}")
+        return await rhid.delete(f"{_PATH}/d?id={reason_id}")

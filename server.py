@@ -13,10 +13,16 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
+from tools.alerttype import register_alerttype_tools
 from tools.colaboradores import register_person_tools
 from tools.escalas import register_escala_tools
+from tools.holiday import register_holiday_tools
+from tools.justificationtype import register_justificationtype_tools
+from tools.layouttxt import register_layouttxt_tools
+from tools.operatorrole import register_operatorrole_tools
 from tools.organizacao import register_org_tools
 from tools.ponto import register_ponto_tools
+from tools.reasondismissal import register_reasondismissal_tools
 from tools.relatorios import register_report_tools
 
 _DOCS = Path(__file__).parent / "docs"
@@ -57,11 +63,17 @@ DOCUMENTAÇÃO COMPLETA — consulte o resource rhid://manual (tools, DTOs, flux
 """,
 )
 
-register_ponto_tools(mcp)
-register_person_tools(mcp)
-register_org_tools(mcp)
-register_report_tools(mcp)
+register_alerttype_tools(mcp)
 register_escala_tools(mcp)
+register_holiday_tools(mcp)
+register_justificationtype_tools(mcp)
+register_layouttxt_tools(mcp)
+register_operatorrole_tools(mcp)
+register_org_tools(mcp)
+register_person_tools(mcp)
+register_ponto_tools(mcp)
+register_reasondismissal_tools(mcp)
+register_report_tools(mcp)
 
 # ── Resources (documentação inline para o agente) ─────────────────
 
