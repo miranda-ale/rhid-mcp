@@ -4,7 +4,7 @@
 
 services:
   rhid-mcp:
-    image: ghcr.io/miranda-ale/rhdi-mcp:latest
+    image: ghcr.io/miranda-ale/rhid-mcp:latest
 
     ports:
       - "${MCP_PORT:-8765}:8765"
