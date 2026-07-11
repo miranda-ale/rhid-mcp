@@ -40,12 +40,22 @@ class RHIDClient:
 
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(f"{BASE_URL}/login", json=payload)
-            r.raise_for_status()
-            data: dict[str, Any] = r.json()
+
+            # A API do RHID retorna HTTP 500 tanto para erros de servidor
+            # quanto para credenciais inválidas, com o motivo real no corpo
+            # JSON (campo "error"). Por isso o corpo é inspecionado antes de
+            # raise_for_status() — do contrário a mensagem real fica
+            # mascarada por um genérico "500 Internal Server Error".
+            try:
+                data: dict[str, Any] = r.json()
+            except ValueError:
+                data = {}
 
             if data.get("error"):
                 msg = f"Falha no login RHID: {data['error']}"
                 raise ValueError(msg)
+
+            r.raise_for_status()
 
             self._token = data["accessToken"]
             self._token_expires_at = time.time() + (4 * 3600)
